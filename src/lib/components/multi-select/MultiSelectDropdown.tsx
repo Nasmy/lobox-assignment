@@ -61,6 +61,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = (
             setSelectedOptions([selectedItem]);
         }
 
+        setSearchTerm('');
         setIsShowDisplayList(false);
     }
 
@@ -97,6 +98,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = (
                 const newItem = { name: searchTerm, id: newId, icon: '' };
                 items.push(newItem);
                 handleSelectedItem(newItem);
+                setSearchTerm('');
             }
         }
     }
