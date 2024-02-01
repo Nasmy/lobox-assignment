@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import './MultiSelectDropdown.scss';
 
 interface Item {
@@ -32,6 +32,22 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = (
     const [searchTerm, setSearchTerm] = useState('');
     const [isShowOptionList, setIsShowDisplayList] = useState<boolean>(false);
 
+    const divRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (divRef.current && !divRef.current.contains(event.target as Node)) {
+                setIsShowDisplayList(false);
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
+
     const handleOnChange = (term: string) => {
         setSearchTerm(term);
         setIsShowDisplayList(true);
@@ -57,6 +73,11 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = (
             item?.name.toLowerCase().includes(searchTerm.toLowerCase()))
             .map((filteredItem, index) => <li onClick={() => handleSelectedItem(filteredItem)} key={index}>{filteredItem.name}</li>);
     }
+
+    const handleRemoveOption = (id: number) => {
+        const updatedOptions = selectedOptions.filter((option) => option.id !== id);
+        setSelectedOptions(updatedOptions);
+    };
 
     const renderSearchItems = (): ReactNode => {
         const filteredItems = filterOptions();
@@ -85,7 +106,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = (
             <div>
                 <label>{label}</label>
             </div>
-            <div className="dropdown-container">
+            <div ref={divRef} className="dropdown-container">
                 <input
                     type='text'
                     className="dropdown-input"
@@ -99,7 +120,11 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = (
                 />
                 <div className="selected-options">
                     {selectedOptions.map((item, index) => (
-                        <span key={index}>{item.name}, </span>
+                        <span key={item.id}>
+                            <span>{item.name}</span>
+                            <button className="close-button" aria-label="Close alert" onClick={() => handleRemoveOption(item.id)}>&times;</button>
+                            {', '}
+                        </span>
                     ))}
                 </div>
                 {isShowOptionList && <div className='option-container'>
